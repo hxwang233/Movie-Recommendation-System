@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fjnu.movie.mapper.UserMapper">
+
+    <!--定义查询-->
+    <select id="getUserByDynamicConditions" resultType="com.fjnu.movie.domain.User" parameterType="Map">
+        select * from user
+        where 1 = 1
+        <if test="params.key != null and params.key != ''">
+            and (name like "%"#{params.key}"%" or zip_code like "%"#{params.key}"%")
+        </if>
+        <if test="params.age != null and params.age != ''" >
+            and age = #{params.age}
+        </if>
+        <if test="params.occupation != null and params.occupation != '' or params.occupation == 0">
+            and occupation = #{params.occupation}
+        </if>
+        <if test="params.gender != null and params.gender != '' or params.gender == 0 ">
+            and gender = #{params.gender}
+        </if>
+    </select>
+
+    <update id="resetUserPwd" parameterType="int">
+        update user set password = "88888888" where uid = #{uid}
+    </update>
+
+</mapper>

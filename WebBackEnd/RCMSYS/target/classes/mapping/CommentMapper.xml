@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fjnu.movie.mapper.CommentMapper">
+
+    <!--定义查询-->
+    <select id="getCommentsByMID" resultType="com.fjnu.movie.vo.MovieComment" parameterType="int">
+        select c.cid cid, u.name uname, c.content content, c.created_time createdTime, u.head_pic headPic
+        from comment c, user u, movie m
+        where c.mid = #{mid} and c.uid = u.uid and m.mid = #{mid}
+        order by c.created_time DESC
+    </select>
+
+    <select id="getAllComments" resultType="com.fjnu.movie.vo.CommentView">
+        select c.cid cid, u.name userName, m.name movieName, c.content content, c.created_time createdTime
+        from comment c, user u, movie m
+        where c.mid = m.mid and c.uid = u.uid
+        order by c.created_time DESC
+    </select>
+
+    <select id="getAllComments2" resultType="com.fjnu.movie.vo.CommentView">
+        select c.cid cid, a.name userName, m.name movieName, c.content content, c.created_time createdTime
+        from comment c, admin a, movie m
+        where c.mid = m.mid and c.uid = a.uid
+        order by c.created_time DESC
+    </select>
+
+    <select id="getCommentByDynamicConditions" resultType="com.fjnu.movie.vo.CommentView" parameterType="Map">
+        select distinct c.cid cid, u.name userName, m.name movieName, c.content content, c.created_time createdTime
+        from comment c, user u, movie m
+        where c.mid = m.mid and c.uid = u.uid
+        <if test="params.key != null and params.key != ''">
+            and (m.name like "%"#{params.key}"%" or u.name like "%"#{params.key}"%")
+        </if>
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and (created_time &gt;= #{params.startTime} and created_time &lt;= #{params.endTime})
+        </if>
+    </select>
+
+
+    <update id="updateContentById" parameterType="Map">
+        update comment set content = #{params.content} where cid = #{params.cid}
+    </update>
+
+</mapper>

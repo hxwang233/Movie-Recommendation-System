@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fjnu.movie.mapper.BulletinMapper">
+
+    <!--定义查询-->
+    <select id="getAllBulletin" resultType="com.fjnu.movie.vo.BulletinView">
+        SELECT id, u.uid uid, u.name userName, gender userGender, age userAge, occupation userOccupation, a.name adminName, email adminEmail, content, b.created_time createdTime
+        from bulletin b, bulletin_user bu, user u, admin a
+        WHERE a.uid = b.admin_id AND bu.bid = b.id AND bu.uid = u.uid
+    </select>
+
+    <select id="getBulletinByDynamicConditions" resultType="com.fjnu.movie.vo.BulletinView" parameterType="Map">
+        SELECT id, u.uid uid, u.name userName, gender userGender, age userAge, occupation userOccupation, a.name adminName, email adminEmail, content, b.created_time createdTime
+        from bulletin b, bulletin_user bu, user u, admin a
+        WHERE a.uid = b.admin_id AND bu.bid = b.id AND bu.uid = u.uid
+        <if test="params.key != null and params.key != ''">
+            and (u.name like "%"#{params.key}"%" or a.name like "%"#{params.key}"%" or a.email like "%"#{params.key}"%" )
+        </if>
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and (b.created_time &gt;= #{params.startTime} and b.created_time &lt;= #{params.endTime})
+        </if>
+        <if test="params.age != null and params.age != ''" >
+            and u.age = #{params.age}
+        </if>
+        <if test="params.occupation != null and params.occupation != '' or params.occupation == 0">
+            and u.occupation = #{params.occupation}
+        </if>
+        <if test="params.gender != null and params.gender != '' or params.gender == 0 ">
+            and u.gender = #{params.gender}
+        </if>
+    </select>
+
+    <update id="updateContentById" parameterType="Map">
+        update bulletin set content = #{params.content} where id = #{params.id}
+    </update>
+
+    <select id="getBulletinByUserId" resultType="com.fjnu.movie.vo.UserBulletinView" parameterType="int">
+        SELECT distinct id, a.uid uid, a.name adminName, a.head_pic headPic , email adminEmail, content, has_read hasRead, b.created_time createdTime
+        from bulletin b, bulletin_user bu, user u, admin a
+        WHERE bu.uid = #{uid} AND a.uid = b.admin_id AND bu.bid = b.id
+        order by has_read ASC
+    </select>
+
+    <update id="updateAllReadFlag" parameterType="int">
+        UPDATE bulletin_user set has_read = 1 WHERE uid = #{uid}
+    </update>
+
+    <update id="updateReadFlag" parameterType="Map">
+        UPDATE bulletin_user set has_read = 1 WHERE uid = #{params.uid} and bid = #{params.bid}
+    </update>
+
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fjnu.movie.mapper.MovieMapper">
+
+    <!--定义查询-->
+    <select id="searchMovie" resultType="com.fjnu.movie.vo.MovieSearchView" parameterType="String">
+        select distinct mid, name, pic, intro from movie where name like "%"#{value}"%" or directors like "%"#{value}"%"
+            or stars like "%"#{value}"%" or writers like "%"#{value}"%" or intro like "%"#{value}"%" or genre like "%"#{value}"%"
+    </select>
+
+
+    <select id="getMovieSynopsisByMIDs" resultType="com.fjnu.movie.vo.MovieSynopsis" parameterType="List">
+        select mid, name, pic from movie where mid in
+        <foreach collection="mids" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getAllMovie" resultType="com.fjnu.movie.vo.MovieView" parameterType="List">
+        select mid, name, genre, release_time releaseTime, directors from movie
+    </select>
+
+    <select id="getMovieNumByDynamicConditions" resultType="int" parameterType="Map">
+        select COUNT(*) from
+        (select distinct m.mid mid, m.name name, m.pic pic
+        from movie m, movie_genre mg
+        where mg.mid = m.mid
+        <if test="params.gid != null and params.gid != '' and params.gid != -1 or params.gid == 0">
+            and mg.gid = #{params.gid}
+        </if>
+        and m.mid in
+        (select m.mid mid from movie m where 1=1
+        <if test="params.aid != null and params.aid != '' and params.aid != -1 or params.aid == 0">
+            and m.aid = #{params.aid}
+        </if>
+        <if test="params.tid != null and params.tid != '' and params.tid != -1 or params.tid == 0">
+            and m.tid = #{params.tid}
+        </if>
+        ))as temp
+    </select>
+
+    <select id="getMovieSynopsisByDynamicConditions" resultType="com.fjnu.movie.vo.MovieSynopsis" parameterType="Map">
+        select distinct m.mid mid, m.name name, m.pic pic
+        from movie m, movie_genre mg
+        where mg.mid = m.mid
+        <if test="params.gid != null and params.gid != '' and params.gid != -1 or params.gid == 0">
+            and mg.gid = #{params.gid}
+        </if>
+        and m.mid in
+        (select mid from movie where 1=1
+            <if test="params.aid != null and params.aid != '' and params.aid != -1 or params.aid == 0">
+                and aid = #{params.aid}
+            </if>
+            <if test="params.tid != null and params.tid != '' and params.tid != -1 or params.tid == 0">
+                and tid = #{params.tid}
+            </if>
+        )
+        order by m.mid limit #{params.currentNo}, #{params.limit}
+    </select>
+
+    <select id="getMovieByDynamicConditions" resultType="com.fjnu.movie.vo.MovieView" parameterType="Map">
+        select distinct m.mid mid, name, genre, release_time releaseTime, directors
+        from movie m, movie_genre mg
+        where mg.mid = m.mid
+        <if test="params.genre != null and params.genre != '' and params.genre != -1 or params.genre == 0">
+            and mg.gid = #{params.genre}
+        </if>
+        and m.mid in
+        (select mid from movie where 1=1
+        <if test="params.key != null and params.key != ''">
+            and (name like "%"#{params.key}"%" or directors like "%"#{params.key}"%"
+            or stars like "%"#{params.key}"%" or writers like "%"#{params.key}"%")
+        </if>
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and (release_time &gt;= #{params.startTime} and release_time &lt;= #{params.endTime})
+        </if>
+        )
+    </select>
+
+    <select id="getMovieByName" resultType="com.fjnu.movie.vo.MovieView" parameterType="String">
+        select mid, name, genre, release_time releaseTime, directors
+        from movie where name like "%"#{movieName}"%"
+    </select>
+
+
+</mapper>

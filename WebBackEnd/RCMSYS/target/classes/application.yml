@@ -1,0 +1,27 @@
+spring:
+  thymeleaf:
+    enabled: true
+    encoding: utf-8
+    prefix: classpath:/templates/
+    cache: false
+    mode: HTML
+    suffix: .html
+  datasource:
+    name: test
+    url: jdbc:mysql://49.232.136.242:3306/rcmsys?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+    username: mrcmer
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+  data:
+    mongodb:
+      uri: mongodb://49.232.136.242:27017/history
+
+server:
+  port: 8083
+
+mybatis:
+  mapper-locations: classpath:mapping/*.xml
+  type-aliases-package: com.fjnu.movie.domian
+
+mybatis-plus:
+  mapper-locations: classpath:mapping/*.xml

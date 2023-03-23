@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fjnu.movie.mapper.AdminMapper">
+
+    <resultMap id="AdminResult" type="com.fjnu.movie.vo.AdminView">
+        <result column="uid" jdbcType="INTEGER" property="uid" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="email" jdbcType="VARCHAR" property="email" />
+        <result column="created_time" jdbcType="VARCHAR" property="createdTime" />
+        <result column="head_pic" jdbcType="VARCHAR" property="headPic" />
+        <collection property="accessList" ofType="com.fjnu.movie.domain.Menu" select="selectAccess" column="uid">
+        </collection>
+    </resultMap>
+
+    <select id="getAllAdmin" resultMap="AdminResult">
+        select * from admin
+    </select>
+
+    <select id="selectAccess" resultType="com.fjnu.movie.domain.Menu" >
+        select menu.id, icon, menu_key menuKey, tag_color tagColor from authority, menu where admin_id = #{uid} and menu_id = menu.id
+    </select>
+
+    <!--定义查询-->
+    <select id="getAdminByDynamicConditions" resultMap="AdminResult" parameterType="Map">
+        select * from admin
+        where 1 = 1
+        <if test="params.key != null and params.key != ''">
+            and (name like "%"#{params.key}"%" or email like "%"#{params.key}"%")
+        </if>
+        <if test="params.access != null and params.access != '' or params.access == 0">
+            and (uid in (select distinct admin_id from authority where menu_id = #{params.access}))
+        </if>
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and (created_time &gt;= #{params.startTime} and created_time &lt;= #{params.endTime})
+        </if>
+    </select>
+
+    <update id="resetAdminPwd" parameterType="int">
+        update admin set password = "88888888" where uid = #{uid}
+    </update>
+
+</mapper>
